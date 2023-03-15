@@ -44,20 +44,32 @@ while running:
         if not point_active:
             # randomize the point
             rand = random.randint(0, len(cells))
-            while (cells[rand].data == "player" or cells[rand].data == "point"):
+            while (cells[rand].data == "player" or cells[rand].data == "point" or cells[rand].data == "death"):
                 rand += 1
                 if rand >= len(cells):
                     rand = 0
         
             cells[rand].data = "point"
+
+            # randomize the death cell
+            rand = random.randint(0, len(cells))
+            while (cells[rand].data == "player" or cells[rand].data == "point" or cells[rand].data == "death"):
+                rand += 1
+                if rand >= len(cells):
+                    rand = 0
+        
+            cells[rand].data = "death"
+
             point_active = True
 
         # get color for cells
         color = (30, 30, 30)
         if cells[i].data == "player":
-            color = (255, 70, 70)
+            color = (70, 70, 255)
         elif cells[i].data == "point":
             color = (70, 255, 70)
+        elif cells[i].data == "death":
+            color = (255, 70, 70)
 
         pygame.draw.rect(screen, color, pygame.Rect(30 + ((cell_size + cell_margin) * x), 30 + ((cell_size + cell_margin) * y), cell_size, cell_size))
 
