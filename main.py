@@ -22,6 +22,9 @@ cell_size = 100
 cell_margin = 10
 
 pygame.init()
+pygame.display.set_caption('AI game shit thing')
+Icon = pygame.image.load('icon.jpeg')
+pygame.display.set_icon(Icon)
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
@@ -44,6 +47,8 @@ while running:
         if not point_active:
             # randomize the point
             rand = random.randint(0, len(cells))
+            if rand >= len(cells):
+                rand = 0
             while (cells[rand].data == "player" or cells[rand].data == "point" or cells[rand].data == "death"):
                 rand += 1
                 if rand >= len(cells):
@@ -53,6 +58,8 @@ while running:
 
             # randomize the death cell
             rand = random.randint(0, len(cells))
+            if rand >= len(cells):
+                rand = 0
             while (cells[rand].data == "player" or cells[rand].data == "point" or cells[rand].data == "death"):
                 rand += 1
                 if rand >= len(cells):
