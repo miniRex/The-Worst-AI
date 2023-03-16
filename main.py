@@ -9,8 +9,8 @@ class cell:
         self.data = data
 
 class simulation:
-    def __init__(self, score, cells, location):
-        self.score = score
+    def __init__(self, raw_score, cells, location):
+        self.raw_score = raw_score
         self.cells = cells
         self.location = location
         self.actions = []
@@ -49,18 +49,18 @@ def move(index, location, x, y):
 
     target_x = generation_data[index].cells[location].x + x
     if target_x >= grid_size:
-        generation_data[index].score -= 1
+        generation_data[index].raw_score -= 1
         target_x = grid_size - 1
     elif target_x < 0:
-        generation_data[index].score -= 1
+        generation_data[index].raw_score -= 1
         target_x = 0
 
     target_y = generation_data[index].cells[location].y + y
     if target_y >= grid_size:
-        generation_data[index].score -= 1
+        generation_data[index].raw_score -= 1
         target_y = grid_size - 1
     elif target_y < 0:
-        generation_data[index].score -= 1
+        generation_data[index].raw_score -= 1
         target_y = 0
 
     target_index = location
@@ -70,10 +70,10 @@ def move(index, location, x, y):
             break
 
     if generation_data[index].cells[target_index].data == "point":
-        generation_data[index].score += 1
+        generation_data[index].raw_score += 1
         generation_data[index].ended = True
     elif generation_data[index].cells[target_index].data == "death":
-        generation_data[index].score -= 10
+        generation_data[index].raw_score -= 10
         generation_data[index].ended = True
 
     generation_data[index].cells[location].data = "null"
@@ -104,8 +104,8 @@ while running:
     best_index = 0
     best_score = 0
     for i in range(len(generation_data)):
-        if generation_data[i].score > best_score:
-            best_score = generation_data[i].score
+        if generation_data[i].raw_score > best_score:
+            best_score = generation_data[i].raw_score
             best_index = i
 
     for i in range(len(generation_data[0].cells)):
