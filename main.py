@@ -1,6 +1,7 @@
 import random
 import pygame
 from pygame.locals import *
+import sys
 
 class cell:
     def __init__(self, x, y, data):
@@ -77,7 +78,8 @@ def move(index, location, x, y):
         generation_data[index].ended = True
 
     generation_data[index].cells[location].data = "null"
-    generation_data[index].cells[target_index].data = "player"
+    if (generation_data[index].cells[target_index].data != "death" and generation_data[index].cells[target_index].data != "point"):
+        generation_data[index].cells[target_index].data = "player"
     generation_data[index].location = target_index
 
 pygame.init()
@@ -101,8 +103,8 @@ while running:
     if len(generation_data) == 0:
         break
 
-    best_index = 0
-    best_score = 0
+    best_index = -1
+    best_score = -sys.maxsize
     for i in range(len(generation_data)):
         if generation_data[i].raw_score > best_score:
             best_score = generation_data[i].raw_score
@@ -126,7 +128,7 @@ while running:
         cell_data_text = font.render("data:{data}".format(data = generation_data[0].cells[i].data), False, (255, 255, 255))
         screen.blit(cell_data_text, (35 + ((cell_size + cell_margin) * x), 55 + ((cell_size + cell_margin) * y)))
 
-    score_text = font.render("best: (index: {bin}, score: {bsc})".format(bin = best_index, bsc = best_score), False, (255, 255, 255))
+    score_text = font.render("best: (index: {bin}, score: {bsc}, location: {loc})".format(bin = best_index, bsc = best_score, loc = generation_data[best_index].location), False, (255, 255, 255))
     screen.blit(score_text, (50 + ((cell_size + cell_margin) * (x + 1)), 30))
     generaion_text = font.render("generation: {gen}".format(gen = generation), False, (255, 255, 255))
     screen.blit(generaion_text, (50 + ((cell_size + cell_margin) * (x + 1)), 50))
@@ -137,19 +139,20 @@ while running:
             end_count += 1
 
     if end_count == len(generation_data):
-        #start_generation()
+        start_generation()
         generation += 1
+        pygame.time.delay(1000)
     else:
         for g in range(len(generation_data)):
             if generation_data[g].ended:
-                break
+                continue
 
             x = generation_data[g].cells[generation_data[g].location].x
             y = generation_data[g].cells[generation_data[g].location].y
 
             pygame.draw.rect(screen, (70, 70, 255), pygame.Rect(30 + ((cell_size + cell_margin) * x), 30 + ((cell_size + cell_margin) * y), cell_size, cell_size))
 
-            cell_text = font.render("{x},{y} (id:{id})".format(x = x, y = y, id = i), False, (255, 255, 255))
+            cell_text = font.render("{x},{y} (id:{id})".format(x = x, y = y, id = generation_data[g].location), False, (255, 255, 255))
             screen.blit(cell_text, (35 + ((cell_size + cell_margin) * x), 32 + ((cell_size + cell_margin) * y)))
             cell_data_text = font.render("data:{data}".format(data = generation_data[g].cells[i].data), False, (255, 255, 255))
             screen.blit(cell_data_text, (35 + ((cell_size + cell_margin) * x), 55 + ((cell_size + cell_margin) * y)))
@@ -159,7 +162,7 @@ while running:
             action = actions[random.randint(0, len(actions) - 1)]
             move(g, generation_data[g].location, action[0], action[1])
 
-    pygame.time.delay(300)
+    pygame.time.delay(500)
 
     pygame.display.flip()
     clock.tick(60) # fps limit
