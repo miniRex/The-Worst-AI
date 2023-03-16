@@ -28,8 +28,12 @@ cell_margin = 10
 generation = 0
 generation_data = []
 
+fallow_actions = 75 # percentage from 100
 actions = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]
 simulations_per_generation = 10
+
+last_best = -sys.maxsize
+last_actions = []
 
 def start_generation():
     global generation_data
@@ -71,16 +75,17 @@ def move(index, location, x, y):
             break
 
     if generation_data[index].cells[target_index].data == "point":
-        generation_data[index].raw_score += 1
+        generation_data[index].raw_score += 50
         generation_data[index].ended = True
     elif generation_data[index].cells[target_index].data == "death":
-        generation_data[index].raw_score -= 10
+        generation_data[index].raw_score = -sys.maxsize
         generation_data[index].ended = True
 
     generation_data[index].cells[location].data = "null"
     if (generation_data[index].cells[target_index].data != "death" and generation_data[index].cells[target_index].data != "point"):
         generation_data[index].cells[target_index].data = "player"
     generation_data[index].location = target_index
+    generation_data[index].actions.append([target_x, target_y])
 
 pygame.init()
 pygame.display.set_caption('AI game shit thing')
@@ -106,8 +111,9 @@ while running:
     best_index = -1
     best_score = -sys.maxsize
     for i in range(len(generation_data)):
-        if generation_data[i].raw_score > best_score:
-            best_score = generation_data[i].raw_score
+        score = (generation_data[i].raw_score - len(generation_data[i].actions))
+        if score > best_score:
+            best_score = score
             best_index = i
 
     for i in range(len(generation_data[0].cells)):
@@ -116,7 +122,7 @@ while running:
 
         color = (30, 30, 30)
         if i == point_cell:
-            color = (70, 255, 70)
+            color = (235, 210, 70)
         elif i == death_cell:
             color = (255, 70, 70)
 
@@ -138,9 +144,14 @@ while running:
         if gen.ended:
             end_count += 1
 
-    if end_count == len(generation_data):
+    if end_count == len(generation_data): 
+        if last_best < best_score:
+            last_best = best_score
+            last_actions = generation_data[best_index].actions
         start_generation()
+        print("best from gen {gen} was {ind} with {scr} points".format(gen = generation, ind = best_index, scr = best_score))
         generation += 1
+
         pygame.time.delay(1000)
     else:
         for g in range(len(generation_data)):
@@ -159,10 +170,31 @@ while running:
             simulation_text = font.render("score:{sc}".format(sc = generation_data[g].raw_score), False, (255, 255, 255))
             screen.blit(simulation_text, (35 + ((cell_size + cell_margin) * x), 78 + ((cell_size + cell_margin) * y)))
 
-            action = actions[random.randint(0, len(actions) - 1)]
+            if random.randrange(0, 100) < fallow_actions and len(last_actions) > 0 and len(generation_data[g].actions) < len(last_actions):
+                action = last_actions[len(generation_data[g].actions)]
+            else:
+                action = actions[random.randint(0, len(actions) - 1)]
+            
             move(g, generation_data[g].location, action[0], action[1])
 
-    pygame.time.delay(500)
+            if (generation_data[g].raw_score < -30):
+                generation_data[g].raw_score = -sys.maxsize
+                generation_data[g].ended = True
+
+    # draw the best simulation
+    x = generation_data[best_index].cells[generation_data[best_index].location].x
+    y = generation_data[best_index].cells[generation_data[best_index].location].y
+
+    pygame.draw.rect(screen, (70, 255, 70), pygame.Rect(30 + ((cell_size + cell_margin) * x), 30 + ((cell_size + cell_margin) * y), cell_size, cell_size))
+
+    cell_text = font.render("{x},{y} (id:{id})".format(x = x, y = y, id = generation_data[best_index].location), False, (255, 255, 255))
+    screen.blit(cell_text, (35 + ((cell_size + cell_margin) * x), 32 + ((cell_size + cell_margin) * y)))
+    cell_data_text = font.render("data:{data}".format(data = generation_data[best_index].cells[i].data), False, (255, 255, 255))
+    screen.blit(cell_data_text, (35 + ((cell_size + cell_margin) * x), 55 + ((cell_size + cell_margin) * y)))
+    simulation_text = font.render("score:{sc}".format(sc = generation_data[best_index].raw_score), False, (255, 255, 255))
+    screen.blit(simulation_text, (35 + ((cell_size + cell_margin) * x), 78 + ((cell_size + cell_margin) * y)))
+
+    #pygame.time.delay(100)
 
     pygame.display.flip()
     clock.tick(60) # fps limit
