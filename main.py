@@ -153,8 +153,8 @@ while running:
             screen.blit(cell_text, (35 + ((cell_size + cell_margin) * x), 32 + ((cell_size + cell_margin) * y)))
             cell_data_text = font.render("data:{data}".format(data = generation_data[g].cells[i].data), False, (255, 255, 255))
             screen.blit(cell_data_text, (35 + ((cell_size + cell_margin) * x), 55 + ((cell_size + cell_margin) * y)))
-            simulation_text = font.render("data:{data}".format(data = generation_data[g].cells[i].data), False, (255, 255, 255))
-            screen.blit(simulation_text, (35 + ((cell_size + cell_margin) * x), 55 + ((cell_size + cell_margin) * y)))
+            simulation_text = font.render("score:{sc}".format(sc = generation_data[g].raw_score), False, (255, 255, 255))
+            screen.blit(simulation_text, (35 + ((cell_size + cell_margin) * x), 78 + ((cell_size + cell_margin) * y)))
 
             action = actions[random.randint(0, len(actions) - 1)]
             move(g, generation_data[g].location, action[0], action[1])
