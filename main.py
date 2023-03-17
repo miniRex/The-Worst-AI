@@ -148,8 +148,8 @@ while running:
         if last_best < best_score:
             last_best = best_score
             last_actions = generation_data[best_index].actions
-        start_generation()
         print("best from gen {gen} was {ind} with {scr} points".format(gen = generation, ind = best_index, scr = best_score))
+        start_generation()
         generation += 1
 
         pygame.time.delay(1000)
